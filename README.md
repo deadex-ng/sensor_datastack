@@ -1,48 +1,29 @@
 # Apache Airflow and DBT using Docker Compose
-Stand-alone project that utilises public eCommerce data from Instacart to demonstrate how to schedule dbt models through Airflow.
-
-For more Data & Analytics related reading, check https://analyticsmayhem.com
-
 ## Requirements 
 * Install [Docker](https://www.docker.com/products/docker-desktop)
 * Install [Docker Compose](https://docs.docker.com/compose/install/)
-* Download the [Kaggle Instacart eCommerce dataset](https://www.kaggle.com/c/instacart-market-basket-analysis/data) 
 
 ## Setup 
 * Clone the repository
-* Extract the CSV files within ./sample_data directory (files are needed as seed data)
+* Extract the CSV files within ./sample_data/data directory (files are needed as seed data)
 
 Change directory within the repository and run `docker-compose up`. This will perform the following:
-* Based on the definition of [`docker-compose.yml`](https://github.com/konosp/dbt-airflow-docker-compose/blob/master/docker-compose.yml) will download the necessary images to run the project. This includes the following services:
+* Based on the definition of [`docker-compose.yml`](https://github.com/deadex-ng/sensor_datastack/blob/add-superset/docker-compose.yml) will download the necessary images to run the project. This includes the following services:
   * postgres-airflow: DB for Airflow to connect and store task execution information
   * postgres-dbt: DB for the DBT seed data and SQL models to be stored
   * airflow: Python-based image to execute Airflow scheduler and webserver
   * adminer: a lightweight DB client
 
 ## Connections
-* Adminer UI: [http://localhost:8080](http://localhost:8080/?pgsql=postgres-dbt&username=dbtuser&db=dbtdb&ns=dbt) Credentials as defined at [`docker-compose.yml`](https://github.com/konosp/dbt-airflow-docker-compose/blob/master/docker-compose.yml)
 * Airflow UI: http://localhost:8000
 
 ## How to ran the DAGs
 Once everything is up and running, navigate to the Airflow UI (see connections above). You will be presented with the list of DAGs, all Off by default.
 
-<img src="https://storage.googleapis.com/analyticsmayhem-blog-files/dbt-airflow-docker/dbt-dags-list.png" width="70%"></img>
-
 You will need to run to execute them in correct order. 
-- 1_load_initial_data: Load the raw Kaggle dataset
-- 2_init_once_dbt_models: Perform some basic transformations (i.e. build an artificial date for the orders)
-- 3_snapshot_dbt_models: Build the snapshot tables
-- 4_daily_dbt_models: Schedule the daily models. The starting date is set on Jan 6th, 2019. This will force Ariflow to backfill all date for those dates. So leave that for last.
-
-<img src="https://storage.googleapis.com/analyticsmayhem-blog-files/dbt-airflow-docker/dbt-dag-triggering.png" width="70%"></img>
-
-If everything goes well, you should have the daily model execute successfully and see similar task durations as per below.
-
-<img src="https://storage.googleapis.com/analyticsmayhem-blog-files/dbt-airflow-docker/dbt-task-duration-over-time.png" width="70%"></img>
-
-Finally, within Adminer you can view the final models.
-<img src="https://storage.googleapis.com/analyticsmayhem-blog-files/dbt-airflow-docker/dbt-adminer-view.png" width="70%"></img>
-
+- python_dag:Load initial data
+- dbt_dag: perfom some transformations 
+* The queries in python_dag have to be uncommented to load the data from differetn files into the database
 ## Docker Compose Commands
 * Enable the services: `docker-compose up` or `docker-compose up -d` (detatches the terminal from the services' log)
 * Disable the services: `docker-compose down` Non-destructive operation.

@@ -1,0 +1,9 @@
+version: 2
+
+models:
+  - name: all_avg_speed
+    columns:
+      - name: ID
+        description: This is a unique identifier for a station 
+        tests:
+          - not_null
